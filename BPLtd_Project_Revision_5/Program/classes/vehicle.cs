@@ -9,12 +9,12 @@
 
 class vehicle
 {
-    
+    int Test;
 
     public vehicle(){}
     public vehicle(int placeholder)
     {
-
+        Test = placeholder;
     }
 
 }
