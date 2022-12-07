@@ -5,16 +5,20 @@
 //  Code by Jacob Lummis
 //  ARU-P SID: 2213276
 // ----------------------------------------------------------
-//
-
+// Vehicle Class:
 class vehicle
 {
-    int Test;
+    // Vehicle Attribute:
+    // At this level, it consists of an ID number for counting purposes.
+    int VehicleNumber;
 
+    // Vehicle Constructors:
+    // Blank Constructor for program initialisation
     public vehicle(){}
-    public vehicle(int placeholder)
+    // Constructor used when generating vehicle object instances.
+    public vehicle(int vnum)
     {
-        Test = placeholder;
+        VehicleNumber = vnum;
     }
-
 }
+// Full Program: 444 Lines of Code, including Comments and Whitespace.

@@ -6,84 +6,89 @@
 //  ARU-P SID: 2213276
 // ----------------------------------------------------------
 // Main Program File:
-// call using directives, define internal variables
+// Call necessary 'using' directives
 using System.Timers;
-int userChoice = 0;
-ConsoleKeyInfo userKey;
-bool validKeyPress = false;
-bool validKeyPress2 = false;
-bool scrnRefresh = true;
-int vehicleCount = 0, left, top;
-int totalFuelDispensed = 0;
-int totalVehiclesServiced = 0;
-// Declare vehicle list and index vehicle
-vehicle indexVehicle = new vehicle();
-List<vehicle> vehiclePool = new List<vehicle>();
-// vehiclePool.Add(indexVehicle = new vehicle(1000));
 
-//
-pump[] pumps = new pump[9];
+// Declare Program Variables
+ConsoleKeyInfo userKey;
+int userChoice = 0, vehicleCount = 0, left, top, totalFuelDispensed = 0, totalVehiclesServiced = 0;
+bool validKeyPress = false, validKeyPress2 = false, scrnRefresh = true;
 string[] pumpStatus = new string[9]{"OPEN", "OPEN", "OPEN", "OPEN", "OPEN", "OPEN", "OPEN", "OPEN", "OPEN"};
+
+//-----------------------------------------------------------------------------------------------------------
+//// Previous Version Artifact, when I didn't realise I was passing full List access
+//// to a method in the Pump class. I thought I was only passing a copy, and thus was 
+//// attempting to empty the list twice. Left in as reminder
+//// vehiclePool.Add(indexVehicle = new vehicle(1000));
+//-----------------------------------------------------------------------------------------------------------
+
+// The Fuel Station Forecourt is represented as a One-Dimensional Array of Pump Objects
+// In Later versions, the Array Initialiser could be tied to an "Admin" adjustable config file option.
+pump[] pumps = new pump[9];
+
+// Populate the Forecourt array
 for(int spot = 0; spot < pumps.Length; spot++)
 {
     pumps[spot] = new pump(spot + 1);
 }
 
-int[] currentVehiclesServed = new int[pumps.Length];
-int[] currentFuelDispensed = new int[pumps.Length];
+// Generate Two 1-Dimensional integer arrays for tallying during shift
+int[] currentVehiclesServed = new int[pumps.Length], currentFuelDispensed = new int[pumps.Length];
 
-// Vehicle Queue
+// Declare the Index Vehicle, and then the Vehicle Pool List as a List of Vehicle Objects.
+vehicle indexVehicle = new vehicle();
+List<vehicle> vehiclePool = new List<vehicle>();
+// Declare Vehicle Queue as List of Vehicle Objects.
 List<vehicle> vehicleQueue = new List<vehicle>();
-// vehicle newVehicle = new vehicle(999);
-// vehicleQueue.Add(newVehicle);
-// Initialise Timer
-System.Timers.Timer aTimer;
 
-// Initialise user interface and subordinate threads
-// userInterface thisInterface = new userInterface();
-// thisInterface.userChoice = 0;
-// Thread Navigator = new Thread(thisInterface.keyReader);
+// Initialise Vehicle Generation Timer
+System.Timers.Timer vehiclePoolTimer;
+
+// Declare new Threads to run 'in-parallel' with Main Program
 Thread Navigator = new Thread(keyReader);
 Thread Tally = new Thread(fuelTally);
 
-// Main Program Body
-Console.WriteLine("\n");
+// Main Program Body:
+// Start Additional Threads
 Navigator.Start();
 Tally.Start();
-Console.WriteLine("\tPress Enter to start shift,\n\tEscape to exit.");   
-// Call vehicle generating timer
+
+// Program Start Screen Fluff
+Console.WriteLine("\n\n\tPress Enter to start shift,\n\tEscape to exit.\n");   
+
+// Start/Call vehicle generation timer
 setTimer();
 while(userChoice != 1)
 {
     while((validKeyPress != true) && (userChoice != 2)){}
-
+    // Early Program Exit Check
     if(userChoice == 1)
     {
         break;
     }
-
     Console.Clear();
-
+    // Program Shift Loop
     while(validKeyPress2 != true)
     {
         (left, top) = Console.GetCursorPosition();
         Console.WriteLine("\n\tPress Exit to End Shift.");
-        Console.WriteLine("\n\tQueue: {0}", (vehicleQueue.Count()));
+        Console.WriteLine("\n\tQueue: {0}\t\tTotal Vehicle Pool: {1}", vehicleQueue.Count(), vehicleCount);
         Console.WriteLine("\tPump 1: {0}\tPump 2: {1}\tPump 3: {2}\n\tPump 4: {3}\tPump 5: {4}\tPump 6: {5}\n\tPump 7: {6}\tPump 8: {7}\tPump 9: {8}\n", pumpStatus[0], pumpStatus[1], pumpStatus[2], pumpStatus[3], pumpStatus[4], pumpStatus[5], pumpStatus[6], pumpStatus[7], pumpStatus[8]);
         Console.WriteLine("\tVehicles Serviced: {0} \n\tTotalFuelDispensed: {1}", Convert.ToString(totalVehiclesServiced),  Convert.ToString(totalFuelDispensed));
         Console.SetCursorPosition(left, top);
         scrnRefresh = true;
         while(scrnRefresh != false)
         {
-            //
-                if(vehiclePool.Count() > 1)
+            if(vehiclePool.Count() > 1)
+            {
+                while(vehicleQueue.Count() != 1)
                 {
-                    while(vehicleQueue.Count() != 1)
-                    {
-                        vehicleQueue.Add(vehiclePool[1]);
-                        vehiclePool.Remove(vehiclePool[1]);
-                    }
+                    vehicleQueue.Add(vehiclePool[1]);
+                    vehiclePool.Remove(vehiclePool[1]);
                 }
+            }
+            // Check if Pumps are Busy, Couldn't figure out how to pass access to
+            // the string array down to a timer method, something to look into.
             for(int i = 0; i < pumps.Length; i++)
             {
                 if(pumps[i].getStatus() == false)
@@ -91,40 +96,41 @@ while(userChoice != 1)
                     pumpStatus[i] = "OPEN";
                 }
             }
+            // Wait for 40 milliseconds, Resulting in 25 Frames Per Second
             Thread.Sleep(40);
             scrnRefresh = false;
         }
     }
 }
-
+// In the event of user leaving early, kill vehicle generation timer
 if(userChoice == 1)
 {
-    aTimer.Stop();
-    aTimer.Dispose();
+    vehiclePoolTimer.Stop();
+    vehiclePoolTimer.Dispose();
 }
-
+// Exit Screen Clear & Window Hold
 Console.Clear();
-Console.WriteLine("\n\n\tPress any key to exit.");
+Console.WriteLine("\n\n\tPress any key to exit.\n");
 Console.ReadKey();
 
-// Program Methods
+// Program Methods:
+// Vehicle Generation Timer & Timer Elapsed Event Methods
 void setTimer()
 {
-    aTimer = new System.Timers.Timer(1500);
-    //
-    aTimer.Elapsed += OnTimedEvent;
-    aTimer.AutoReset = true;
-    aTimer.Enabled = true;
+    vehiclePoolTimer = new System.Timers.Timer(1500);
+    // Timer Settings
+    vehiclePoolTimer.Elapsed += OnTimedEvent;
+    vehiclePoolTimer.AutoReset = true;
+    vehiclePoolTimer.Enabled = true;
 }
-
 void OnTimedEvent(Object source, ElapsedEventArgs e)
 {
     indexVehicle = new vehicle(vehicleCount);
     vehiclePool.Add(indexVehicle);
     if(vehicleCount >= 80)
     {
-        aTimer.Stop();
-        aTimer.Dispose();
+        vehiclePoolTimer.Stop();
+        vehiclePoolTimer.Dispose();
         // Console.WriteLine(vehicleCount);
     }
     else
@@ -133,7 +139,8 @@ void OnTimedEvent(Object source, ElapsedEventArgs e)
         vehicleCount++;
     }
 }
-
+// Meanwhile In a seperate Thread, the Fuel Station's
+// Statistics are tallied
 void fuelTally()
 {
     while(userChoice != 1)
@@ -141,23 +148,23 @@ void fuelTally()
         for(int i = 0; i < pumps.Length; i++)
         {
             currentFuelDispensed[i] = pumps[i].getFuelDispensed();
-            currentVehiclesServed[i] = + pumps[i].getVehiclesServiced();
+            currentVehiclesServed[i] = + pumps[i].getServicedVehiclesNum();
         }
-        Thread.Sleep(100);
         totalFuelDispensed = currentFuelDispensed.Sum();
         totalVehiclesServiced = currentVehiclesServed.Sum();
     }
 }
-
-// Key Registry
+// Key Registry Method, Run on seperate Thread for responsiveness.
 void keyReader()
 {
     while(userChoice != 1)
     {
+        // Registers user input without writing to screen.
         userKey = Console.ReadKey(true);
         switch(userKey.Key)
         {
-            // 
+            // Program Exit Condition Case
+            // and Contexts.
             case ConsoleKey.Escape:
             {
                 if(validKeyPress != true)
@@ -176,6 +183,7 @@ void keyReader()
                 }
                 break;
             }
+            // Condition to get past the start screen.
             case ConsoleKey.Enter:
             {
                 if(validKeyPress != true)
@@ -185,7 +193,15 @@ void keyReader()
                 }
                 break;
             }
-            // Number keys and Numpad keys recognised
+            // Primary Program Logic Cases:
+            // Register's either the main 1 to 9 keys
+            // or their Numpad equivelants as valid input.
+            // If corresponding pump (Converting from a count
+            // starting at 1 to a count starting at zero)
+            // is free AND there is a vehicle in the queue;
+            // then set the Pump's display status to "BUSY"
+            // and call that pumps vehicle assignment method,
+            // passing in access to the Main Program's vehicleQueue List.
             case((ConsoleKey.D1) or (ConsoleKey.NumPad1)):
             {
                 if(pumps[0].getStatus() != true)
@@ -294,7 +310,7 @@ void keyReader()
                 }
                 break;
             }
-            // Unrecognised Key-press does nothing
+            // Any unrecognised Key-presses do nothing
             default:
             {
                 break;
