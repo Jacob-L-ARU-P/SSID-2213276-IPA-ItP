@@ -72,9 +72,9 @@ while(userChoice != 1)
     {
         (left, top) = Console.GetCursorPosition();
         Console.WriteLine("\n\tPress Exit to End Shift.");
-        Console.WriteLine("\n\tQueue: {0}\t\tTotal Vehicle Pool: {1}", vehicleQueue.Count(), vehicleCount);
+        Console.WriteLine("\n\tQueue: {0}\t\tTotal Vehicle Pool: {1}", vehicleQueue.Count(), vehiclePool.Count());
         Console.WriteLine("\tPump 1: {0}\tPump 2: {1}\tPump 3: {2}\n\tPump 4: {3}\tPump 5: {4}\tPump 6: {5}\n\tPump 7: {6}\tPump 8: {7}\tPump 9: {8}\n", pumpStatus[0], pumpStatus[1], pumpStatus[2], pumpStatus[3], pumpStatus[4], pumpStatus[5], pumpStatus[6], pumpStatus[7], pumpStatus[8]);
-        Console.WriteLine("\tVehicles Serviced: {0} \n\tTotalFuelDispensed: {1}", Convert.ToString(totalVehiclesServiced),  Convert.ToString(totalFuelDispensed));
+        Console.WriteLine("\tVehicles Serviced: {0} \n\tTotalFuelDispensed: {1} Litres", Convert.ToString(totalVehiclesServiced),  Convert.ToString(totalFuelDispensed));
         Console.SetCursorPosition(left, top);
         scrnRefresh = true;
         while(scrnRefresh != false)
