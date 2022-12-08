@@ -1,0 +1,5 @@
+https://learn.microsoft.com/en-us/dotnet/api/system.random?view=net-7.0
+https://learn.microsoft.com/en-us/dotnet/api/system.random?view=net-7.0#ThreadSafety
+https://learn.microsoft.com/en-us/dotnet/api/system.random?view=net-7.0#Functionality
+https://dotnetcoretutorials.com/2021/08/10/generating-random-numbers-in-net/
+https://www.fourmilab.ch/hotbits/
