@@ -71,20 +71,22 @@ while(userChoice != 1)
     while(validKeyPress2 != true)
     {
         (left, top) = Console.GetCursorPosition();
-        Console.WriteLine("\n\tPress Exit to End Shift.");
-        Console.WriteLine("\n\tQueue: {0}\t\tTotal Vehicle Pool: {1}", vehicleQueue.Count(), vehiclePool.Count());
+        Console.WriteLine("\n\tTo Assign a vehicle to a pump, press the corresponding number key.\n\tYou can end your shift early, or service all vehicles.\n\tPress Exit to End Shift.");
+        Console.WriteLine("\n\tQueue: {0}\tVehicle Forecast/Total Vehicles remaining: {1}  ", vehicleQueue.Count(), vehiclePool.Count());
         Console.WriteLine("\tPump 1: {0}\tPump 2: {1}\tPump 3: {2}\n\tPump 4: {3}\tPump 5: {4}\tPump 6: {5}\n\tPump 7: {6}\tPump 8: {7}\tPump 9: {8}\n", pumpStatus[0], pumpStatus[1], pumpStatus[2], pumpStatus[3], pumpStatus[4], pumpStatus[5], pumpStatus[6], pumpStatus[7], pumpStatus[8]);
-        Console.WriteLine("\tVehicles Serviced: {0} \n\tTotalFuelDispensed: {1} Litres", Convert.ToString(totalVehiclesServiced),  Convert.ToString(totalFuelDispensed));
+        Console.WriteLine("\tVehicles Serviced: {0} \n\tTotal Fuel Dispensed: {1} Litres", Convert.ToString(totalVehiclesServiced),  Convert.ToString(totalFuelDispensed));
+        Console.WriteLine("\tStation Gross Revenue: £{0:N2}    \n\tAttendant's 1% Commission: £{1:N2}     ", (totalFuelDispensed * 1.6), ((totalFuelDispensed * 1.6) / 100));
+        Console.WriteLine("\n\tPlease Note that the Fuel Price per Litre is assumed as 160.00 pence per litre.");
         Console.SetCursorPosition(left, top);
         scrnRefresh = true;
         while(scrnRefresh != false)
         {
-            if(vehiclePool.Count() > 1)
+            if(vehiclePool.Count() > 0)
             {
                 while(vehicleQueue.Count() != 1)
                 {
-                    vehicleQueue.Add(vehiclePool[1]);
-                    vehiclePool.Remove(vehiclePool[1]);
+                    vehicleQueue.Add(vehiclePool[0]);
+                    vehiclePool.Remove(vehiclePool[0]);
                 }
             }
             // Check if Pumps are Busy, Couldn't figure out how to pass access to
